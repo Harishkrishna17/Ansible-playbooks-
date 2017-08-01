@@ -1,0 +1,23 @@
+---
+- hosts: all
+  sudo: true
+  tasks:
+
+    - name: Install Tomcat 7
+      apt: 'pkg={{item}} state=present'
+      with_items:
+        - openjdk-7-jre-headless
+        - tomcat7
+
+    - name: Get JRE path
+      shell: ls -d /usr/lib/jvm/java-8* | tail -1
+      register: jre_8_ls
+
+    - name: Set JRE path   
+      set_fact: jre_8_path="{{jre_8_ls.stdout}}"
+      notify: Restart Tomcat
+
+  handlers:
+
+    - name: Restart Tomcat
+      service: name=tomcat7 state=restarted
